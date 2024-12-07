@@ -1,0 +1,57 @@
+
+services:
+  app1:
+    build:
+      context: ./backend  # Ensure this path is correct for your app1 source code
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=mouadhnika2003
+      - DB_NAME=authdb
+    networks:
+      - app-network
+
+  app2:
+    build:
+      context: ./my-app  # Ensure this path is correct for your app2 source code
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db
+    environment:
+      - NODE_ENV=development
+      - API_URL=http://app1:3000  # Using the service name for inter-container communication
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=mouadhnika2003
+      - DB_NAME=authdb
+    networks:
+      - app-network
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mouadhnika2003
+      POSTGRES_DB: authdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - app-network
+
+volumes:
+  pgdata:
+
+networks:
+  app-network:
+    driver: bridge
